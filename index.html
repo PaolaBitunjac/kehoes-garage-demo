@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kehoe's Garage | Workshop Tracker</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+header {
+    background: #17202a;
+    color: white;
+    padding: 22px 16px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+header p {
+    margin: 7px 0 0;
+    color: #d5d8dc;
+}
+
+.sample-banner {
+    background: #fff3cd;
+    color: #664d03;
+    padding: 11px;
+    text-align: center;
+    font-weight: bold;
+}
+
+nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ddd;
+}
+
+nav button {
+    flex: 1;
+    min-height: 58px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #e5e7eb;
+}
+
+nav button.active {
+    background: #17202a;
+    color: white;
+}
+
+main {
+    max-width: 1000px;
+    margin: auto;
+    padding: 16px;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+h2 {
+    margin-bottom: 5px;
+}
+
+.intro {
+    color: #6b7280;
+    margin-top: 0;
+}
+
+.car-card {
+    background: white;
+    border-radius: 12px;
+    padding: 17px;
+    margin: 13px 0;
+    border-left: 6px solid #6b7280;
+    box-shadow: 0 2px 7px rgba(0,0,0,.08);
+}
+
+.car-card.waiting {
+    border-left-color: #f59e0b;
+}
+
+.car-card.overdue {
+    background: #fee2e2;
+    border-left-color: #dc2626;
+}
+
+.car-card.ready {
+    border-left-color: #16a34a;
+}
+
+.car-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.registration {
+    font-weight: bold;
+    font-size: 19px;
+}
+
+.job-number {
+    color: #6b7280;
+}
+
+.stage {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #e5e7eb;
+    font-weight: bold;
+}
+
+.note {
+    margin: 12px 0;
+}
+
+.advance-button {
+    width: 100%;
+    min-height: 62px;
+    border: 0;
+    border-radius: 10px;
+    background: #17202a;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.advance-button:disabled {
+    background: #9ca3af;
+    cursor: default;
+}
+
+.office-group {
+    margin: 25px 0;
+}
+
+.office-group h3 {
+    border-bottom: 2px solid #d1d5db;
+    padding-bottom: 8px;
+}
+
+.summary-box {
+    background: #17202a;
+    color: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin: 15px 0 25px;
+}
+
+.summary-number {
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.customer-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 18px;
+    box-shadow: 0 2px 7px rgba(0,0,0,.08);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+input {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 6px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.search-button {
+    width: 100%;
+    min-height: 58px;
+    margin-top: 18px;
+    border: 0;
+    border-radius: 9px;
+    background: #17202a;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.customer-result {
+    margin-top: 20px;
+}
+
+.error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 14px;
+    border-radius: 8px;
+}
+
+.warning {
+    color: #b91c1c;
+    font-weight: bold;
+}
+
+.small {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.reset-area {
+    text-align: center;
+    margin: 35px 0;
+}
+
+.reset-button {
+    border: 1px solid #9ca3af;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    nav button {
+        font-size: 14px;
+        padding: 8px 4px;
+    }
+
+    .car-top {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🔧 Kehoe's Garage</h1>
+    <p>Workshop Job Tracker</p>
+</header>
+
+<div class="sample-banner">
+    DEMONSTRATION ONLY — ALL VEHICLE AND CUSTOMER INFORMATION IS SAMPLE DATA
+</div>
+
+<nav>
+    <button id="workshopTab" class="active"
+        onclick="showView('workshop')">🔧 Workshop</button>
+
+    <button id="customerTab"
+        onclick="showView('customer')">🚗 Customer</button>
+
+    <button id="officeTab"
+        onclick="showView('office')">📋 Office</button>
+</nav>
+
+<main>
+
+<section id="workshop" class="view active">
+
+    <h2>Today's Workshop</h2>
+
+    <p class="intro">
+        Tap the large button to move a vehicle to its next stage.
+        No typing required.
+    </p>
+
+    <div id="workshopCars"></div>
+
+</section>
+
+
+<section id="customer" class="view">
+
+    <h2>Check Your Vehicle</h2>
+
+    <p class="intro">
+        Enter your job number and registration to see your vehicle's
+        current status.
+    </p>
+
+    <div class="customer-box">
+
+        <label for="jobSearch">Job number</label>
+        <input id="jobSearch" placeholder="Example: K1001">
+
+        <label for="regSearch">Registration</label>
+        <input id="regSearch" placeholder="Example: 221-WX-1234">
+
+        <button class="search-button" onclick="findCustomerCar()">
+            Check my vehicle
+        </button>
+
+        <div id="customerResult" class="customer-result"></div>
+
+    </div>
+
+    <p class="small">
+        Demo tip: try job number K1001 and registration 221-WX-1234.
+    </p>
+
+</section>
+
+
+<section id="office" class="view">
+
+    <h2>Office Overview</h2>
+
+    <p class="intro">
+        Vehicles are grouped by their current workshop stage.
+    </p>
+
+    <div class="summary-box">
+        <div>Ready but not yet collected</div>
+        <div id="readyCount" class="summary-number">0</div>
+    </div>
+
+    <div id="officeCars"></div>
+
+</section>
+
+
+<div class="reset-area">
+    <button class="reset-button" onclick="resetDemo()">
+        Reset sample data
+    </button>
+</div>
+
+</main>
+
+
+<script>
+
+const stages = [
+    "Booked in",
+    "Being checked",
+    "Waiting for parts",
+    "Being fixed",
+    "Ready to collect"
+];
+
+
+/*
+    SAMPLE DATA ONLY.
+    waitingDays is used to demonstrate the
+    "waiting for parts for more than two days turns red" rule.
+*/
+
+const originalCars = [
+
+{
+    job: "K1001",
+    reg: "221-WX-1234",
+    vehicle: "Ford Focus",
+    customer: "Sarah Murphy",
+    stage: 0,
+    note: "Vehicle booked in and waiting for inspection.",
+    waitingDays: 0
+},
+
+{
+    job: "K1002",
+    reg: "191-WX-4821",
+    vehicle: "Toyota Corolla",
+    customer: "David Byrne",
+    stage: 1,
+    note: "Vehicle is currently being checked by a mechanic.",
+    waitingDays: 0
+},
+
+{
+    job: "K1003",
+    reg: "181-WX-7712",
+    vehicle: "Volkswagen Golf",
+    customer: "Emma Doyle",
+    stage: 2,
+    note: "We are waiting for a replacement part.",
+    waitingDays: 1
+},
+
+{
+    job: "K1004",
+    reg: "162-WX-3408",
+    vehicle: "Skoda Octavia",
+    customer: "Michael Ryan",
+    stage: 2,
+    note: "A required part has been ordered.",
+    waitingDays: 4
+},
+
+{
+    job: "K1005",
+    reg: "231-WX-5502",
+    vehicle: "Hyundai Tucson",
+    customer: "Laura Kelly",
+    stage: 3,
+    note: "Repairs are currently in progress.",
+    waitingDays: 0
+},
+
+{
+    job: "K1006",
+    reg: "151-WX-9184",
+    vehicle: "Nissan Qashqai",
+    customer: "John Walsh",
+    stage: 4,
+    note: "Your vehicle is ready to collect.",
+    waitingDays: 0
+},
+
+{
+    job: "K1007",
+    reg: "202-WX-6620",
+    vehicle: "Kia Sportage",
+    customer: "Aoife Nolan",
+    stage: 1,
+    note: "A mechanic is checking the vehicle.",
+    waitingDays: 0
+},
+
+{
+    job: "K1008",
+    reg: "171-WX-2955",
+    vehicle: "Opel Astra",
+    customer: "Patrick Brennan",
+    stage: 2,
+    note: "We are waiting for a replacement part.",
+    waitingDays: 3
+}
+
+];
+
+
+let cars =
+    JSON.parse(localStorage.getItem("kehoesGarageCars"))
+    || JSON.parse(JSON.stringify(originalCars));
+
+
+function saveCars() {
+    localStorage.setItem(
+        "kehoesGarageCars",
+        JSON.stringify(cars)
+    );
+}
+
+
+function showView(viewName) {
+
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.remove("active");
+    });
+
+    document.querySelectorAll("nav button").forEach(button => {
+        button.classList.remove("active");
+    });
+
+    document.getElementById(viewName).classList.add("active");
+    document.getElementById(viewName + "Tab").classList.add("active");
+
+    if (viewName === "workshop") {
+        renderWorkshop();
+    }
+
+    if (viewName === "office") {
+        renderOffice();
+    }
+}
+
+
+function getCardClass(car) {
+
+    if (car.stage === 2 && car.waitingDays > 2) {
+        return "car-card overdue";
+    }
+
+    if (car.stage === 2) {
+        return "car-card waiting";
+    }
+
+    if (car.stage === 4) {
+        return "car-card ready";
+    }
+
+    return "car-card";
+}
+
+
+function renderWorkshop() {
+
+    const container = document.getElementById("workshopCars");
+
+    container.innerHTML = "";
+
+    cars.forEach((car, index) => {
+
+        const finished = car.stage === stages.length - 1;
+
+        const warning =
+            car.stage === 2 && car.waitingDays > 2
+            ? `<p class="warning">
+                ⚠ Waiting for parts for ${car.waitingDays} days
+               </p>`
+            : "";
+
+        container.innerHTML += `
+
+        <div class="${getCardClass(car)}">
+
+            <div class="car-top">
+
+                <div>
+                    <div class="registration">${car.reg}</div>
+                    <div>${car.vehicle}</div>
+                </div>
+
+                <div class="job-number">
+                    Job ${car.job}
+                </div>
+
+            </div>
+
+            <div class="stage">
+                ${stages[car.stage]}
+            </div>
+
+            ${warning}
+
+            <p class="note">${car.note}</p>
+
+            <button
+                class="advance-button"
+                onclick="advanceCar(${index})"
+                ${finished ? "disabled" : ""}
+            >
+                ${
+                    finished
+                    ? "✓ Ready to collect"
+                    : "Move to: " + stages[car.stage + 1]
+                }
+            </button>
+
+        </div>
+        `;
+    });
+}
+
+
+function advanceCar(index) {
+
+    if (cars[index].stage >= stages.length - 1) {
+        return;
+    }
+
+    cars[index].stage++;
+
+    const newStage = stages[cars[index].stage];
+
+    if (newStage === "Being checked") {
+        cars[index].note =
+            "Your vehicle is currently being checked by a mechanic.";
+    }
+
+    if (newStage === "Waiting for parts") {
+        cars[index].note =
+            "We are waiting for a required part.";
+        cars[index].waitingDays = 0;
+    }
+
+    if (newStage === "Being fixed") {
+        cars[index].note =
+            "Repairs are currently in progress.";
+        cars[index].waitingDays = 0;
+    }
+
+    if (newStage === "Ready to collect") {
+        cars[index].note =
+            "Your vehicle is ready to collect.";
+        cars[index].waitingDays = 0;
+    }
+
+    saveCars();
+    renderWorkshop();
+}
+
+
+function findCustomerCar() {
+
+    const job =
+        document.getElementById("jobSearch")
+        .value.trim().toUpperCase();
+
+    const reg =
+        document.getElementById("regSearch")
+        .value.trim().toUpperCase();
+
+    const result =
+        document.getElementById("customerResult");
+
+    const car = cars.find(c =>
+        c.job.toUpperCase() === job &&
+        c.reg.toUpperCase() === reg
+    );
+
+    if (!car) {
+
+        result.innerHTML = `
+            <div class="error">
+                No vehicle was found using that job number
+                and registration. Please check both details.
+            </div>
+        `;
+
+        return;
+    }
+
+    /*
+        Only information belonging to the matched vehicle
+        is displayed here.
+    */
+
+    result.innerHTML = `
+
+        <div class="${getCardClass(car)}">
+
+            <div class="registration">
+                ${car.reg}
+            </div>
+
+            <p>${car.vehicle}</p>
+
+            <div class="stage">
+                ${stages[car.stage]}
+            </div>
+
+            <p class="note">
+                ${car.note}
+            </p>
+
+        </div>
+    `;
+}
+
+
+function renderOffice() {
+
+    const container =
+        document.getElementById("officeCars");
+
+    container.innerHTML = "";
+
+    const readyCars =
+        cars.filter(car => car.stage === 4);
+
+    document.getElementById("readyCount")
+        .textContent = readyCars.length;
+
+
+    stages.forEach((stageName, stageIndex) => {
+
+        const group =
+            cars.filter(car => car.stage === stageIndex);
+
+        if (group.length === 0) {
+            return;
+        }
+
+        let html = `
+
+        <div class="office-group">
+
+            <h3>
+                ${stageName} (${group.length})
+            </h3>
+        `;
+
+
+        group.forEach(car => {
+
+            const warning =
+                car.stage === 2 &&
+                car.waitingDays > 2
+                ? `
+                <p class="warning">
+                    ⚠ Waiting ${car.waitingDays} days
+                </p>
+                `
+                : "";
+
+            html += `
+
+            <div class="${getCardClass(car)}">
+
+                <div class="registration">
+                    ${car.reg}
+                </div>
+
+                <div>
+                    ${car.vehicle}
+                </div>
+
+                <div class="job-number">
+                    Job ${car.job}
+                </div>
+
+                ${warning}
+
+            </div>
+            `;
+        });
+
+
+        html += `</div>`;
+
+        container.innerHTML += html;
+
+    });
+}
+
+
+function resetDemo() {
+
+    const confirmed =
+        confirm("Reset all vehicles to the original sample data?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    cars =
+        JSON.parse(JSON.stringify(originalCars));
+
+    saveCars();
+
+    document.getElementById("customerResult")
+        .innerHTML = "";
+
+    renderWorkshop();
+    renderOffice();
+}
+
+
+renderWorkshop();
+renderOffice();
+
+</script>
+
+</body>
+</html>s
