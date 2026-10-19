@@ -623,7 +623,7 @@ function findCustomerCar() {
 
     const job =
         document.getElementById("jobSearch")
-        .value.trim().toUpperCase();
+        .value.trim().toUpperCase().replace(/^JOB\s+/, "");
 
     const reg =
         document.getElementById("regSearch")
